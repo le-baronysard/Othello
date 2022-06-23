@@ -1,44 +1,68 @@
+from xmlrpc.client import Boolean
 import numpy as np
+import time
 
 class Ruler():
     def __init__(self):
-        self.board = np.full((8,8),"0")
+        self.board = np.full((8,8),0)
         # Sarting pieces
-        self.board[(3,3)],self.board[(4,4)] = "W","W"
-        self.board[(3,4)],self.board[(4,3)] = "B","B"
+        self.board[(3,3)],self.board[(4,4)] = 1,1  #"W","W"
+        self.board[(3,4)],self.board[(4,3)] = -1,-1 #"B","B"
         # First player is always Black
         self.turn = 0
-        self.player_turn = "B"
+        self.player_turn = -1 #"B"
 
 
-    def on_board(self,pos:tuple):
-        return pos[0]>0 and pos[1]>0 and pos[0]<8 and pos[1]<8
+        # TODO methods and return that we should implement
+        # STILL NOT DECIDED 100% !!! NEED TO THINK ABOUT IT
+        #ruler.redo(self): --> Return to last turn
+        # '-> we may need to implement a ruler.memory to keep track of the
+        # game
+        # like ruler.memory = {turn:{playerWhite:[posoccupiedbyWhite]}
+        #                           ,playerBlack:[posoccupiedbuBlack]
+        #                   ou alors board:[[1,-1,0 .....]] A voir
+        #                           ,score:{-1:0,1:0}
+        #                           ,playerTurn:-1 ou 1}
+        #
+        # ruler.write_move()
+        # ruler.valids_move() : return all the possible moove
 
-    def is_valid(self,move:tuple,player=None):
+
+
+    def on_board(self,pos:tuple) -> bool :
+        return pos[0]>=0 and pos[1]>=0 and pos[0]<8 and pos[1]<8
+
+    def is_valid(self,move:tuple,player:int=None):
         move = np.array(move)
         if player == None : player = self.player_turn
-        enemy = "W" if player=="B" else "B"
+        enemy = 1 if player==-1 else -1
         if not self.on_board(move): return False
-        directions = np.array([(0, 1), (1,  1), (1,  0), (1, -1)
-                              ,(0,-1), (-1,-1), (-1, 0), (-1, 1)])
+        directions = [(0, 1), (1,  1), (1,  0), (1, -1)
+                              ,(0,-1), (-1,-1), (-1, 0), (-1, 1)]
         flipped = []
-        for dir in directions :
-            search = move + dir
+        for dire in directions :
+            search = move[0]+dire[0],move[1]+dire[1]
             will_it_flipp = []
-            while self.on_board(search) and self.board[tuple(search)]==enemy:
-                print(search)
-                will_it_flipp.append(tuple(search))
-                search += dir
-                if not self.on_board(search) : break
-                self.board[tuple(search)]
-            if not self.on_board(search):continue
-            if will_it_flipp==[]:continue
-            flipped.append(will_it_flipp)
+            while self.on_board(search) and self.board[search]==enemy:
+                will_it_flipp.append(search)
+                search = search[0]+dire[0],search[1]+dire[1]
+            if not self.on_board(search) or self.board[search]!=player:continue
+            if will_it_flipp!=[]:
+                flipped+=(will_it_flipp)
         if len(flipped)>=1 : return flipped
         return False
 
 
+    def valids_mooves(self) -> tuple :
+        '''Return the current player turn and a list of possibles moves'''
+        return (self.player_turn,[(i,j) for i in range(8) for j in range(8) if ruler.is_valid((i,j))])
+
+
 if __name__=='__main__':
+    start = time.time()
     ruler = Ruler()
-    print(ruler.is_valid((2,3)))
-    print(ruler.board)
+    print(ruler.is_valid((3,2)))
+    print(ruler.board[(3,3)])
+    end = time.time()
+    print("Process time",end-start)
+    print(ruler.valids_mooves())
