@@ -55,7 +55,7 @@ class Ruler():
 
     def valids_mooves(self) -> tuple :
         '''Return the current player turn and a list of possibles moves'''
-        return (self.player_turn,[(i,j) for i in range(8) for j in range(8) if ruler.is_valid((i,j))])
+        return (self.player_turn,[(i,j) for i in range(8) for j in range(8) if self.is_valid((i,j))])
 
 
 if __name__=='__main__':

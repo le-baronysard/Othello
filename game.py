@@ -1,11 +1,17 @@
 import pygame
-from params import *
 import time
 import random
+
+# locals Imports
+from params import *
+from ruler import Ruler
+
+
 
 class Game():
     def __init__(self):
         pygame.init()
+        self.ruler = Ruler()
         self.width = WIDTH
         self.height = HEIGHT
         if SCREEN_MODE == "DEFAULT":
@@ -20,16 +26,8 @@ class Game():
         self.running = True
         print(f"UI initialised with {self.width}x{self.height} pixels")
         #
-        unitw = int(self.width/11)
-        unith = int(self.height/11)
-        self.unit =min(unith,unitw)
         ## loading the images before the game loop to save comput time
-        self.white_token = pygame.transform.scale(pygame.image.load("data/w6.png")
-                                                  ,(self.unit,self.unit))
-        self.black_token = pygame.transform.scale(pygame.image.load("data/b.png")
-                                                  ,(self.unit,self.unit))
-        self.wood_board = pygame.transform.scale(pygame.image.load("data/brown_wood.jpg")
-                                                 ,(9*self.unit,9*self.unit))
+        self.load_and_resize()
 
 
     def draw_text(self, text, size, x, y ,color =WHITE,surface=None):
@@ -50,39 +48,26 @@ class Game():
                     #pygame.quit()
                 if event.type == pygame.KEYDOWN :
                     if event.key == pygame.K_ESCAPE :
-                        print("escape")
+                        print("Escape key pressed, Game shutting down...")
                         self.running=False
             # If the windows has beeen resize we need to update "unit"
             # and resize the img we are using
             if self.unit != min( self.display.get_height()/11
                             ,self.display.get_width()/11) :
-                self.unit = min( self.display.get_height()/11
-                            ,self.display.get_width()/11)
-                self.width, self.height = self.display.get_size()
-                self.white_token = pygame.transform.scale(pygame.image.load("data/w6.png")
-                                                  ,(self.unit,self.unit))
-                self.black_token = pygame.transform.scale(pygame.image.load("data/b.png")
-                                                  ,(self.unit,self.unit))
-                self.wood_board = pygame.transform.scale(pygame.image.load("data/brown_wood.jpg")
-                                                 ,(9*self.unit,9*self.unit))
+                self.load_and_resize()
 
 
-            #pygame.draw.lines(self.display,BLACK,False,w_coord)
-            #pygame.draw.line(self.display,BLACK,(0,10),(100,100),1)
-            #pygame.display.update()
+
             game.draw_leaderboard()
-
             self.draw_board()
-            # BEST POS
-            #game.draw_text("TDKLAPDO",11,self.width-1/3*self.height,unit/2)
-
+            if t==0 : print(self.ruler.board)
             game.draw_text("TDKLAPDO",11,250,self.unit/2)
             pygame.display.flip()
-            self.clock.tick(5)
+            time.sleep(1)
+            self.clock.tick(30)
             t += 1
-            if t>3000:
-                print(self.width-self.unit*11,self.width/3)
-                print("Game automatically closing after 15 sec during test phase")
+            if t>30:
+                print("Game automatically closing after 30 sec during test phase")
                 break
         pygame.quit()
 
@@ -128,20 +113,35 @@ class Game():
 
         #print(board.get_height(),board.get_width())
         # Drawing pieves
+        player,possibles_mooves = self.ruler.valids_mooves()
+        player_small_token = self.small_black_token if player==-1 else self.small_white_token
         for j in range(8):
             for i in range(8):
-                if j%2==0 :
-                    board.blit(self.black_token,(i*unit,j*unit))
-                else :
-                    board.blit(self.white_token,(i*unit,j*unit))
+                token = self.ruler.board[(i,j)]
+                if token == -1 : board.blit(self.black_token,(i*unit,j*unit))
+                if token ==  1 : board.blit(self.white_token,(i*unit,j*unit))
+                if token ==  0 :
+                    if (i,j) in possibles_mooves :
+                        board.blit(player_small_token,((i+1/3)*unit,(j+1/3)*unit))
+
                 pygame.draw.circle(board,color=(250,0,0),center=(i*unit,unit),radius=1)
-
-
-
         left_panel.blit(board,(1.5*unit,1.5*unit))
         self.display.blit(left_panel,(0,0))
 
-
+    def load_and_resize(self):
+        self.unit = min( self.display.get_height()/11
+                            ,self.display.get_width()/11)
+        self.width, self.height = self.display.get_size()
+        self.white_token = pygame.transform.scale(pygame.image.load("data/w6.png")
+                                                  ,(self.unit,self.unit))
+        self.small_white_token = pygame.transform.scale(pygame.image.load("data/w6.png")
+                                                  ,(self.unit/3,self.unit/3))
+        self.black_token = pygame.transform.scale(pygame.image.load("data/b.png")
+                                                  ,(self.unit,self.unit))
+        self.small_black_token = pygame.transform.scale(pygame.image.load("data/b.png")
+                                                  ,(self.unit/3,self.unit/3))
+        self.wood_board = pygame.transform.scale(pygame.image.load("data/brown_wood.jpg")
+                                                 ,(9*self.unit,9*self.unit))
 
 # TODO draw the board
 # PLayer Input
