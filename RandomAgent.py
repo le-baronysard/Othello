@@ -1,8 +1,6 @@
 # First hand agent to test the UI
 import random
 
-from ruler import Ruler
-
 class RandomAgent():
     def __init__(self):
         pass
@@ -14,7 +12,7 @@ class RandomAgent():
 
 
 if __name__ == "__main__":
-    import ruler
+    from ruler import Ruler
     agent1,agent2 = RandomAgent(),RandomAgent()
     ruler = Ruler()
     for _ in range(10):
