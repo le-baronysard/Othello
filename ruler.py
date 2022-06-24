@@ -13,7 +13,7 @@ class Ruler():
         self.player_turn = -1 #"B"
 
 
-        # TODO methods and return that we should implement
+        # TODO methods and returns formats that we should implement
         # STILL NOT DECIDED 100% !!! NEED TO THINK ABOUT IT
         #ruler.redo(self): --> Return to last turn
         # '-> we may need to implement a ruler.memory to keep track of the
@@ -53,16 +53,33 @@ class Ruler():
         return False
 
 
-    def valids_mooves(self) -> tuple :
+    def valids_moves(self) -> tuple :
         '''Return the current player turn and a list of possibles moves'''
         return (self.player_turn,[(i,j) for i in range(8) for j in range(8) if self.is_valid((i,j))])
+
+
+    def write_move(self,move:tuple):
+        # TODO Update score and write self.memory
+        if not  type(move)==tuple : raise TypeError("Invalid Move format")
+        flipped = self.is_valid(move)
+        if not flipped : raise SyntaxError("Out of range position")
+        self.board[move]=self.player_turn
+        self.player_turn *= -1
+        for pos in flipped :
+            self.board[pos] *= -1
+
+
 
 
 if __name__=='__main__':
     start = time.time()
     ruler = Ruler()
     print(ruler.is_valid((3,2)))
-    print(ruler.board[(3,3)])
+    print(ruler.board)
+    print(ruler.valids_moves())
+    ruler.write_move((3,2))
+    #ruler.write_move((2,2))
+    print(ruler.board)
     end = time.time()
+
     print("Process time",end-start)
-    print(ruler.valids_mooves())
