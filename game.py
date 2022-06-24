@@ -14,7 +14,7 @@ class Game():
         self.ruler = Ruler()
         self.width = WIDTH
         self.height = HEIGHT
-        if SCREEN_MODE == "DEFAULT":
+        if SCREEN_MODE == "FULL":
             screen = pygame.display.set_mode()
             self.width,self.height = screen.get_size()
             # pygame.display.quit()
@@ -79,6 +79,7 @@ class Game():
         pygame.quit()
 
     def draw_leaderboard(self):
+
         leaderboard = pygame.Surface(size=(self.width-11*self.unit,self.height))
         leaderboard.fill(color=BLACK)
         game.draw_text("LEADERBOARD",25,leaderboard.get_width()/2,self.unit/2,
@@ -132,7 +133,6 @@ class Game():
                         self.clickable_square.append(square)
                         board.blit(square,(i*unit+1,j*unit+1))
 
-                pygame.draw.circle(board,color=(250,0,0),center=(i*unit,unit),radius=1)
         #print(self.clickable_square)
         for i in range(9):
             pygame.draw.aaline(board,color=BLACK,start_pos=(i*unit,0),end_pos=(i*unit,9*unit))

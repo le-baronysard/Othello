@@ -1,9 +1,9 @@
 ##### SCREEN SIZE
 
-
-SCREEN_MODE = ""  # in ["DEFAULT","None"] DEFAULT is Full-Screen  None or other to use personnalized definition
+#FULL is Full-Screen  DEFAULT or other to use personnalized definition
+SCREEN_MODE = "DEFAULT"  # in ["DEFAULT","FULL"]
 WIDTH   = 800
-HEIGHT  = 600 #NB game is code so W > H
+HEIGHT  = 600   #NB game is code so W > H
 
 
 ##### COLOR codes
