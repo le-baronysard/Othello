@@ -20,11 +20,11 @@ class Menu(Game):
                     if event.key == pygame.K_ESCAPE :
                         print("escape")
                         self.running=False
-            self.draw_text("The Othello project",50,self.weight/2,self.height/4)
-            self.draw_text("Start Game", 30, self.weight/2, self.height/3+50)
-            self.draw_text("Options", 30, self.weight/2, self.height/3+100)
-            self.draw_text("Credits", 30, self.weight/2, self.height/3+150)
-            self.window.blit(self.display, (0,0))
+            self.draw_text("The Othello project",50,self.width/2,self.height/4)
+            self.draw_text("Start Game", 30, self.width/2, self.height/3+50)
+            self.draw_text("Options", 30, self.width/2, self.height/3+100)
+            self.draw_text("Credits", 30, self.width/2, self.height/3+150)
+            self.display.blit(self.display, (0,0))
             pygame.display.update()
             self.clock.tick(60)
             pass
