@@ -1,6 +1,7 @@
 from xmlrpc.client import Boolean
 import numpy as np
 import time
+import random
 
 class Ruler():
     def __init__(self):
@@ -11,7 +12,8 @@ class Ruler():
         # First player is always Black
         self.turn = 0
         self.player_turn = -1 #"B"
-
+        self.stuck = 0
+        self.keep_playing = True
 
         # TODO methods and returns formats that we should implement
         # STILL NOT DECIDED 100% !!! NEED TO THINK ABOUT IT
@@ -55,18 +57,30 @@ class Ruler():
 
     def valids_moves(self) -> tuple :
         '''Return the current player turn and a list of possibles moves'''
-        return (self.player_turn,[(i,j) for i in range(8) for j in range(8) if self.is_valid((i,j))])
+        valid_move = (self.player_turn,[(i,j) for i in range(8) for j in range(8) if self.is_valid((i,j))
+                                  and self.board[(i,j)] == 0])
+
+        return valid_move if valid_move[1] else (self.player_turn,['No valid move'])
 
 
     def write_move(self,move:tuple):
         # TODO Update score and write self.memory
-        if not  type(move)==tuple : raise TypeError("Invalid Move format")
-        flipped = self.is_valid(move)
-        if not flipped : raise SyntaxError("Out of range position")
-        self.board[move]=self.player_turn
-        self.player_turn *= -1
-        for pos in flipped :
-            self.board[pos] *= -1
+        if not  (type(move)==tuple or move == 'No valid move') : raise TypeError("Invalid Move format")
+
+        if move == 'No valid move':
+            self.player_turn *= -1
+            self.stuck += 1
+            if self.stuck == 2:
+                self.keep_playing = False
+
+        else:
+            flipped = self.is_valid(move)
+            if not flipped : raise SyntaxError("Out of range position")
+            self.board[move]=self.player_turn
+            self.player_turn *= -1
+            self.stuck = 0
+            for pos in flipped :
+                self.board[pos] *= -1
 
 
 
