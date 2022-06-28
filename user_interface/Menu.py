@@ -1,6 +1,6 @@
 import pygame
-from game import Game
-from params import *
+from user_interface.game import Game
+from user_interface.params import *
 
 
 class Menu(Game):

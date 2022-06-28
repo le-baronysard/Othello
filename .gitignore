@@ -1,4 +1,5 @@
 pygame_explore.py
+pygame_experiments.py
 *.ipynb
 __pycache__/*
 *.pyc

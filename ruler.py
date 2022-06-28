@@ -82,18 +82,24 @@ class Ruler():
             for pos in flipped :
                 self.board[pos] *= -1
 
+    def get_player(self):
+        return "BLACK" if self.player_turn ==-1 else "WHITE"
 
 
 
 if __name__=='__main__':
     start = time.time()
     ruler = Ruler()
-    print(ruler.is_valid((3,2)))
+    print(ruler.is_valid((5,4)))
     print(ruler.board)
     print(ruler.valids_moves())
-    ruler.write_move((3,2))
+    ruler.write_move((5,4))
     #ruler.write_move((2,2))
+    ruler.board=np.full((8,8),0)
+    ruler.board[(0,0)]=1
+    ruler.board[(0,1)]=-1
     print(ruler.board)
+    print(ruler.valids_moves())
     end = time.time()
 
     print("Process time",end-start)
