@@ -21,9 +21,8 @@ if __name__ == "__main__":
     #     ruler.write_move(agent1.play(ruler.valids_moves()[1]))
     #     ruler.write_move(agent2.play(ruler.valids_moves()[1]))
     #     print(ruler.board)
-    list_ = []
     while ruler.keep_playing:
         print(ruler.board)
         print(ruler.valids_moves())
-        list_.append(agent1.play(ruler.valids_moves()[1]))
         ruler.write_move(list_[-1])
+    print(ruler.short_memory)

@@ -5,6 +5,8 @@ import random
 
 class Ruler():
     def __init__(self):
+        self.possible_moves = [(i,j) for i in range(8) for j in range(8) if (i,j) not in [(3,3),(3,4),(4,4),(4,3)]]
+        self.short_memory = []
         self.board = np.full((8,8),0)
         # Sarting pieces
         self.board[(3,3)],self.board[(4,4)] = 1,1  #"W","W"
@@ -57,8 +59,7 @@ class Ruler():
 
     def valids_moves(self) -> tuple :
         '''Return the current player turn and a list of possibles moves'''
-        valid_move = (self.player_turn,[(i,j) for i in range(8) for j in range(8) if self.is_valid((i,j))
-                                  and self.board[(i,j)] == 0])
+        valid_move = (self.player_turn,[i for i in self.possible_moves if self.is_valid(i)])
 
         return valid_move if valid_move[1] else (self.player_turn,['No valid move'])
 
@@ -68,6 +69,7 @@ class Ruler():
         if not  (type(move)==tuple or move == 'No valid move') : raise TypeError("Invalid Move format")
 
         if move == 'No valid move':
+            self.short_memory.append(move)
             self.player_turn *= -1
             self.stuck += 1
             if self.stuck == 2:
@@ -79,8 +81,27 @@ class Ruler():
             self.board[move]=self.player_turn
             self.player_turn *= -1
             self.stuck = 0
+            self.possible_moves.remove(move)
+            self.short_memory.append(move)
             for pos in flipped :
                 self.board[pos] *= -1
+
+    def previous_move(self):
+        '''
+        Rejouer la partie permet de ne pas avoir à se souvenir quels jetons ont été retournés avant.
+        '''
+        self.possible_moves = [(i,j) for i in range(8) for j in range(8) if (i,j) not in [(3,3),(3,4),(4,4),(4,3)]]
+        self.board = np.full((8,8),0)
+        self.board[(3,3)],self.board[(4,4)] = 1,1  #"W","W"
+        self.board[(3,4)],self.board[(4,3)] = -1,-1 #"B","B"
+        self.turn = 0
+        self.player_turn = -1 #"B"
+        self.stuck = 0
+        self.keep_playing = True
+        list_ = self.short_memory[:-1]
+        self.short_memory = []
+        for move in list_:
+            self.write_move(move)
 
     def get_player(self):
         return "BLACK" if self.player_turn ==-1 else "WHITE"
