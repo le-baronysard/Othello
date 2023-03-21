@@ -43,7 +43,12 @@ class Game():
         print(f"UI initialised with {self.width}x{self.height} pixels")
         #
         ## loading the images before the game loop to save comput time
+
+        self.width, self.height = 0,0
         self.load_and_resize()
+        self.unit = min( self.display.get_height()/11
+                                ,self.display.get_width()/11)
+        self.int_unit = int(self.unit)
 
 
 
@@ -87,15 +92,17 @@ class Game():
         t = 0
         self.running = True
         self.player = self.ruler.get_player()
+        leaderboard_color=((random.randint(0,254),random.randint(0,254),random.randint(0,254)))
+
         while self.running :
             self.display.fill(WHITE)
             pos = self.check_user_input(pos=True)
             # If the windows has beeen resize we need to update "unit"
             # and resize the img we are using
-            if self.unit != min( self.display.get_height()/11
-                            ,self.display.get_width()/11) :
-                self.load_and_resize()
-            self.draw_leaderboard()
+
+            self.load_and_resize()
+            if t%100==0 : leaderboard_color=((random.randint(0,254),random.randint(0,254),random.randint(0,254)))
+            self.draw_leaderboard(leaderboard_color)
             self.draw_board()
             if t==0 : print(self.ruler.board)
             self.draw_text(f"Current Player : {self.player}",self.unit_int//2,self.height/2,self.unit/2)
@@ -110,7 +117,7 @@ class Game():
                     print("POS",clicked_sprites[0].pos,type(clicked_sprites[0].pos))
                     self.ruler.write_move(clicked_sprites[0].pos)
                     self.player = self.ruler.get_player()
-                    print(self.ruler.board)
+                    #print(self.ruler.board)
 
 
             self.clock.tick(60)
@@ -120,13 +127,13 @@ class Game():
                 break
 
 
-    def draw_leaderboard(self):
+    def draw_leaderboard(self,leaderboard_color):
         leaderboard = pygame.Surface(size=(self.width-11*self.unit,self.height))
         leaderboard.fill(color=BLACK)
-        self.draw_text("LEADERBOARD",25,leaderboard.get_width()/2,self.unit/2,
-                       surface=leaderboard,color=((random.randint(0,254),random.randint(0,254),random.randint(0,254))))
+        self.draw_text("Scores",25,leaderboard.get_width()/2,self.unit/2,
+                       surface=leaderboard,color=leaderboard_color)
         # Drawing basics Info
-        score = {-1:0,1:0} #TODO connect to ruler.py input
+        score = self.ruler.score
         letters_size = 8
         self.draw_text("PLAYER_1  WHITE",letters_size,leaderboard.get_width()/4,2*self.unit,
                        surface=leaderboard)
@@ -164,22 +171,28 @@ class Game():
 
         left_panel.blit(board,(1.5*unit,1.5*unit))
         # Drawing pieces
-        player,possibles_mooves = self.ruler.valids_moves()
+        player,possibles_moves = self.ruler.valids_moves()
+        #print(possibles_moves,self.ruler.get_player())
+        # PASSING TURN AUTO
+        if type(possibles_moves[0])== str :
+            print(player,possibles_moves,self.ruler.possible_moves,self.ruler.stuck,self.ruler.player_turn)
+            self.ruler.write_move(possibles_moves[0])
+            # TODO maybe add a transition that indicate you passed your turn
         player_small_token = self.small_black_token if player==-1 else self.small_white_token
         self.clickable_square = pygame.sprite.Group()
         for j in range(8):
             for i in range(8):
                 token = self.ruler.board[(i,j)]
-                if token == -1 : left_panel.blit(self.black_token,(1.5*unit+i*unit,1.5*unit+j*unit))
-                if token ==  1 : left_panel.blit(self.white_token,(1.5*unit+i*unit,1.5*unit+j*unit))
+                if token == -1 : left_panel.blit(self.black_token,(1.5*unit+j*unit,1.5*unit+i*unit))
+                if token ==  1 : left_panel.blit(self.white_token,(1.5*unit+j*unit,1.5*unit+i*unit))
                 if token ==  0 :
-                    if (i,j) in possibles_mooves :
+                    if (i,j) in possibles_moves :
                         # square = pygame.Surface((unit-1,unit-1))
                         # square.fill(GREEN)
                         # square.blit(player_small_token,((1/3)*unit,(1/3)*unit))
                         # board.blit(square,(i*unit+1,j*unit+1))
                         square = ClickableBox(unit=self.unit,pos=(i,j),image=player_small_token,)
-                        square.rect.topleft = (1.5*unit+i*unit+1,1.5*unit+j*unit+1)
+                        square.rect.topleft = (1.5*unit+j*unit+1,1.5*unit+i*unit+1)
                         self.clickable_square.add(square)
                         left_panel.blit(square.image,square.rect)
         self.display.blit(left_panel,(0,0))
@@ -195,9 +208,9 @@ class Game():
             self.small_white_token = pygame.transform.scale(pygame.image.load("user_interface/data/w6.png")
                                                     ,(self.unit/3,self.unit/3))
             self.black_token = pygame.transform.scale(pygame.image.load("user_interface/data/b.png")
-                                                    ,(self.unit,self.unit))
+                                                    ,(self.unit-1,self.unit-1))
             self.small_black_token = pygame.transform.scale(pygame.image.load("user_interface/data/b.png")
-                                                    ,(self.unit/3,self.unit/3))
+                                                    ,(self.unit/3-1,self.unit/3-1))
             self.wood_board = pygame.transform.scale(pygame.image.load("user_interface/data/brown_wood.jpg")
                                                     ,(9*self.unit,9*self.unit))
 
@@ -347,7 +360,17 @@ class Game():
 
 if __name__== "__main__":
     game = Game()
-
+    import numpy as np
     # game.ruler.player_turn=1
     #game.option_menu_loop()
-    game.main_menu_loop()
+    game.ruler.board = np.array([[ 1,  1,  1,  1,  1,  1,  0,  0,],
+                                [ 1,  1,  1,  1,  1, -1,  0,  0,],
+                                [ 1,  1,  1,  1, -1, -1,  0,  0,],
+                                [-1, -1,  1,  1, -1, -1,  0,  0,],
+                                [-1, -1,  1,  1,  1, -1,  0,  0,],
+                                [-1,  1, -1, -1,  1, -1,  0,  0,],
+                                [-1,  1,  1,  1, -1, -1,  0,  0,],
+                                [-1, -1, -1, -1, -1, -1,  0,  0,]])
+    game.ruler.possible_moves = [(i,j) for i in range(8) for j in [6,7]]
+    game.ruler.player_turn = -1
+    game.game_loop()

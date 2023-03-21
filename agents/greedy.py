@@ -1,24 +1,35 @@
 # First hand agent to test the UI
 import random
-
-class RandomAgent():
-    def __init__(self):
-        pass
-
-    def play(self,moves):
-        choice = random.randint(0,len(moves)-1)
-        return moves[choice]
-
-
+from agents.random import RandomAgent
+from ruler import Ruler
 
 class GreedyAgent():
+    '''
+    Always play the moves that return the most in a one turn forecast
+    '''
     def __init__(self):
         pass
 
     def play(self,moves,ruler):
+        if ruler.valids_moves()[1][0]=="No valid move":
+            return 'No valid move'
         flipped = [len(ruler.is_valid(i)) for i in ruler.valids_moves()[1]]
-        # print(flipped)
         return ruler.valids_moves()[1][flipped.index(max(flipped))]
+
+
+class BreadthFirstSearch():
+    '''
+    Perform a Breadth search and return the best possible moves at this deep
+    If there is multiple possibles mooves return a random choice
+    '''
+    # TODO WIP
+
+    def __init__(self,ruler,depth=2):
+        self.depth = depth
+        self.ruler = Ruler() # We need our own instance of the ruler class
+
+    def search(self,board):
+        self.ruler.board = board.copy()
 
 
 if __name__ == "__main__":

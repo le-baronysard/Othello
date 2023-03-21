@@ -1,7 +1,5 @@
-from xmlrpc.client import Boolean
 import numpy as np
 import time
-import random
 
 class Ruler():
     def __init__(self):
@@ -16,6 +14,8 @@ class Ruler():
         self.player_turn = -1 #"B"
         self.stuck = 0
         self.keep_playing = True
+
+        self.score = {-1:2,1:2}
 
         # TODO methods and returns formats that we should implement
         # STILL NOT DECIDED 100% !!! NEED TO THINK ABOUT IT
@@ -36,7 +36,14 @@ class Ruler():
     def on_board(self,pos:tuple) -> bool :
         return pos[0]>=0 and pos[1]>=0 and pos[0]<8 and pos[1]<8
 
+    def update_score(self):
+        '''Update self.score'''
+        self.score = {  1:(self.board==1).sum()
+                      ,-1:(self.board==-1).sum()
+                      }
+
     def is_valid(self,move:tuple,player:int=None):
+        ''' A valid move would be a tuple that correspond to an unoccupied or "pass'''
         move = np.array(move)
         if player == None : player = self.player_turn
         enemy = 1 if player==-1 else -1
@@ -58,22 +65,26 @@ class Ruler():
 
 
     def valids_moves(self) -> tuple :
-        '''Return the current player turn and a list of possibles moves'''
+        '''Return the current player turn and a list of possibles moves
+        also if the game is ended return the score ?'''
         valid_move = (self.player_turn,[i for i in self.possible_moves if self.is_valid(i)])
 
         return valid_move if valid_move[1] else (self.player_turn,['No valid move'])
 
 
+
     def write_move(self,move:tuple):
-        # TODO Update score and write self.memory
         if not  (type(move)==tuple or move == 'No valid move') : raise TypeError("Invalid Move format")
 
         if move == 'No valid move':
             self.short_memory.append(move)
             self.player_turn *= -1
             self.stuck += 1
+            self.turn += 1
             if self.stuck == 2:
                 self.keep_playing = False
+                self.update_score()
+                return ("Game Over",self.score)
 
         else:
             flipped = self.is_valid(move)
@@ -85,6 +96,8 @@ class Ruler():
             self.short_memory.append(move)
             for pos in flipped :
                 self.board[pos] *= -1
+            self.turn +=1
+            self.update_score()
 
     def previous_move(self):
         '''
@@ -106,6 +119,8 @@ class Ruler():
     def get_player(self):
         return "BLACK" if self.player_turn ==-1 else "WHITE"
 
+    def get_score(self):
+        return {1:np.sum(self.board==1),-1:np.sum(self.board==-1),"turns":self.turn}
 
 
 if __name__=='__main__':
@@ -116,11 +131,9 @@ if __name__=='__main__':
     print(ruler.valids_moves())
     ruler.write_move((5,4))
     #ruler.write_move((2,2))
-    ruler.board=np.full((8,8),0)
-    ruler.board[(0,0)]=1
-    ruler.board[(0,1)]=-1
+
     print(ruler.board)
     print(ruler.valids_moves())
+    print(ruler.get_score())
     end = time.time()
-
     print("Process time",end-start)

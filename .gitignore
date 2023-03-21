@@ -3,3 +3,4 @@ pygame_experiments.py
 *.ipynb
 __pycache__/*
 *.pyc
+.DS_Store
